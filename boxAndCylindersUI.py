@@ -1,7 +1,7 @@
 bl_info = {
         "name":"Boxes and Cylinders",
         "author": "ArsenicManson",
-        "version":(0,5,0),
+        "version":(1,0,0),
         "blender":(5,0,0)}
 
 import bpy
@@ -17,7 +17,7 @@ class box_and_cylinders_panel(bpy.types.Panel):
     bpy.types.Object.box_num = bpy.props.IntProperty(
         name="Number of Boxes",
         description="How many boxes to create",
-        default=1,
+        default=0,
         min=0,
         max=10
         )
@@ -26,14 +26,12 @@ class box_and_cylinders_panel(bpy.types.Panel):
         name="Number of cylinders",
         description="How many cylinders to create",
         default=0,
-        min=1,
+        min=0,
         max=10)
     
     def draw(self, context):
         
         layout = self.layout
-
-        layout.operator("mesh.primitive_cube_add", text="Add Cube")
 
         layout.label(text="Number of Boxes")
         layout.prop(context.object, "box_num", slider=True)
@@ -51,9 +49,11 @@ class create_Exercise(bpy.types.Operator):
     bl_description = "Create Boxes and Cylinders"
 
     def execute(self, context):
-        print('Okay')
         boxes = context.object.box_num
         cyls = context.object.cyl_num
+        
+        if(boxes == 0 and cyls == 0):
+            return {'CANCELLED'}
 
         exe = Exercise_Creator(boxes, cyls)
         exe.init_creation()
@@ -72,6 +72,11 @@ class Exercise_Creator:
         cam = bpy.data.objects.get("Camera")
         cam.location = (0, -10, 3)
         cam.rotation_euler = (math.pi / 2, 0, 0)
+        
+        for area in bpy.context.screen.areas:
+            if area.type == "VIEW_3D":
+                print(area.spaces)
+                area.spaces[0].region_3d.view_perspective = 'CAMERA'
         
         number_of_cubes = 1
         number_of_cylinders = 1
